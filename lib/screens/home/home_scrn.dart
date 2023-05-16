@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -169,6 +170,12 @@ class _HomeScrnState extends State<HomeScrn> with ChangeNotifier {
     }
   }
 
+  stopPlayer() async {
+    Timer.periodic(Duration(seconds: 1), (timer) async {
+      print("--");
+      await FlutterRingtonePlayer.stop();
+    });
+  }
   // Future sendNotification(String title, String body, List token) async {
   //   log("NewwRiderToken$token");
   //   String url = 'https://fcm.googleapis.com/fcm/send';
@@ -413,6 +420,8 @@ class _HomeScrnState extends State<HomeScrn> with ChangeNotifier {
 
   @override
   void initState() {
+    super.initState();
+    stopPlayer();
     getVendorIncome();
     fetchRiderData();
     determinePosition();
@@ -425,7 +434,6 @@ class _HomeScrnState extends State<HomeScrn> with ChangeNotifier {
     Slong = vendorData['longitude'];
     Slat = vendorData['latitude'];
     get_Token();
-    super.initState();
   }
 
   @override
@@ -440,6 +448,30 @@ class _HomeScrnState extends State<HomeScrn> with ChangeNotifier {
       _token = value!;
     });
     print("---Token -- ${_token}");
+  }
+
+  void sendTest() async {
+    var customerFcmToken =
+        "fYIY_nVcQRC-VyFcvp-i5U:APA91bEpnciaDTPiFGVUck6srDzlsBzZhpKArNmdYNPnJejfEpA46OXSOYjK9YNLVx6RKILQwFXh4lYGiscMyRFA3MNG5a2qt-YisoczSRaCm1b-yxpVJHV0zmAcn32Q2B7fc5GSSyep";
+
+    await http
+        .post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+              'Authorization':
+                  'key=AAAABrXMI_I:APA91bFJDmK_680sXhRjX7gjT8ho4J5zfobrTRcQwcsK2NqJgoFutZlVG_8daPhELHX83DbJ5gPn8ytLRqD4kMmKSjYAT71LNv7GRjnjV1goY434Wm-PM-tS-1zHg5tgADLDh-gXGd9g'
+            },
+            body: jsonEncode({
+              'notification': <String, dynamic>{'title': 'test', 'body': 'New Order From xyz', 'sound': 'true'},
+              'priority': 'high',
+              'data': <String, dynamic>{'click_action': 'FLUTTER_NOTIFICATION_CLICK', 'id': '1', 'status': 'done'},
+              'to': customerFcmToken
+            }))
+        .whenComplete(() {
+//      print('sendOrderCollected(): message sent');
+    }).catchError((e) {
+      print('sendOrderCollected() error: $e');
+    });
   }
 
   @override
@@ -466,7 +498,9 @@ class _HomeScrnState extends State<HomeScrn> with ChangeNotifier {
           ),
           actions: [
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  sendTest();
+                },
                 icon: const Icon(
                   Icons.search,
                   color: primary,

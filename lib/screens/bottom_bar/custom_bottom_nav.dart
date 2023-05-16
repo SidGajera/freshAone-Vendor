@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 import 'package:meat4u_vendor/utils/constant.dart';
 import 'package:meat4u_vendor/screens/order/order_scrn.dart';
@@ -24,23 +25,16 @@ class _CustomBottomNavigationState extends State<CustomBottomNavigation> {
   ///if true it will white else orange color
   bool floatingBtnColor = false;
 
-  List<Widget> screens = [
-    HomeScrn(),
-    const OrdersScrn(),
-    WalletScreen(),
-    const ProfileScrn()
-  ];
+  List<Widget> screens = [HomeScrn(), const OrdersScrn(), WalletScreen(), const ProfileScrn()];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(blurRadius: 10, color: textLightColor.withOpacity(0.5))
-            ],
-            borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+            boxShadow: [BoxShadow(blurRadius: 10, color: textLightColor.withOpacity(0.5))],
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
         height: scHeight(context) * 0.09,
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           IconBottomBar(

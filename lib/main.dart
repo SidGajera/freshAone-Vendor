@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,12 +41,22 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 
 // firebase background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (message.notification!.body.toString().contains("New Order From")) {
+  if (message.notification!.body.toString().toLowerCase().contains("New Order from".toLowerCase())) {
     await Firebase.initializeApp();
-    FlutterRingtonePlayer.play(fromAsset: "assets/buzzer.mp3");
-  }
+    print('Player Start------}');
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification!.android;
 
-  print('A bg message just showed up: ${message.messageId}');
+    print('A bg message just showed up: ${message.notification!.body}');
+    if (notification != null && android != null) {
+      await FlutterRingtonePlayer.play(fromAsset: "assets/buzzer.mp3").then((value) {
+        int cnt = 0;
+        Timer(Duration(seconds: 5), () async {
+          await FlutterRingtonePlayer.stop();
+        });
+      });
+    }
+  }
 }
 
 Future<void> main() async {
@@ -56,12 +67,11 @@ Future<void> main() async {
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(badge: true, alert: true);
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions();
 
   await FlutterBackground.initialize();
   FlutterBackground.enableBackgroundExecution();
   MyBackgroundTask().onStart();
-
   runApp(const MyApp());
 }
 
@@ -132,13 +142,9 @@ class _MyAppState extends State<MyApp> {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification!.android;
 
-      if (notification!.body.toString().contains("New Order From")) {
-        await Firebase.initializeApp();
-        FlutterRingtonePlayer.play(fromAsset: "assets/buzzer.mp3");
-      }
-
-      print('A bg message just showed up: ${message.messageId}');
+      print('A bg message just showed up: ${message.notification!.body}');
       if (notification != null && android != null) {
+        print("---- flutterLocalNotificationsPlugin");
         flutterLocalNotificationsPlugin.show(
             notification.hashCode,
             notification.title,
@@ -148,11 +154,22 @@ class _MyAppState extends State<MyApp> {
                 channel.id,
                 channel.name,
                 color: Colors.blue,
-                playSound: true,
+                playSound: false,
                 icon: '@mipmap/ic_launcher',
               ),
             ));
       }
+      // if (notification!.body.toString().contains("New Order From")) {
+      //   await Firebase.initializeApp();
+      //   print('Player Start------}');
+      //   await FlutterRingtonePlayer.play(fromAsset: "assets/buzzer.mp3").then((value) {
+      //     int cnt = 0;
+      //     Timer.periodic(Duration(seconds: 1), (timer) async {
+      //       Future.delayed(Duration(seconds: 1));
+      //       await FlutterRingtonePlayer.stop();
+      //     });
+      //   });
+      // }
     });
   }
 
